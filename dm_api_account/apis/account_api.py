@@ -42,3 +42,18 @@ class AccountApi:
             headers=headers
         )
         return response
+
+    def put_v1_account_email(
+            self,
+            json_data
+    ):
+        """
+        Change registered user email
+        :param json_data:
+        :return:
+        """
+        response = requests.put(
+            url='http://5.63.153.31:5051/v1/account/email',
+            json=json_data
+            )
+        return response
