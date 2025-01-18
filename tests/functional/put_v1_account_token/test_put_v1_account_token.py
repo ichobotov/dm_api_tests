@@ -2,11 +2,10 @@ import time
 from json import loads
 import structlog
 
-from dm_api_account.apis.account_api import AccountApi
-from dm_api_account.apis.login_api import LoginApi
-from mailhog_api.apis.mailhog_api import MailhogApi
 from restclient.configuration import Configuration as MailhogConfiguration
 from restclient.configuration import Configuration as DmApiConfiguration
+from services.dm_api_account import DmApiAccount
+from services.api_mailhog import MailHogApi
 
 structlog.configure(
     processors=[
@@ -15,17 +14,15 @@ structlog.configure(
 
 )
 
-
 def test_put_v1_account_token():
     # Регистрация пользователя
     mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
     dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
 
-    account_api = AccountApi(configuration=dm_api_configuration)
-    login_api = LoginApi(configuration=dm_api_configuration)
-    mailhog_api =MailhogApi(mailhog_configuration)
+    account = DmApiAccount(configuration=dm_api_configuration)
+    mailhog =MailHogApi(configuration=mailhog_configuration)
 
-    login = 'ivan_39'
+    login = 'ivan_45'
     email = f'{login}@mail.ru'
     password = '123456789'
 
@@ -35,12 +32,12 @@ def test_put_v1_account_token():
         'password': password,
     }
 
-    response = account_api.post_v1_account(json_data=json_data)
+    response = account.account_api.post_v1_account(json_data=json_data)
     assert response.status_code == 201, f"Пользователь не был создан, {response.json()}"
 
     # Получение писем из почтового ящика
     time.sleep(0.5)  # Введение задержки, тк иногда возникает ситуация, когда в response еще нет письма с нужным логином
-    response = mailhog_api.get_api_v2_messages()
+    response = mailhog.mailhog_api.get_api_v2_messages()
     assert response.status_code == 200, "Письма не получены"
 
     # Получение активационного токена
@@ -49,7 +46,7 @@ def test_put_v1_account_token():
     assert token is not None, f'токен для пользователя {login} не был получен'
 
     # Активация пользователя
-    response = account_api.put_v1_account_token(token=token)
+    response = account.account_api.put_v1_account_token(token=token)
     assert response.status_code == 200, "Пользователь не был активирован"
 
 
