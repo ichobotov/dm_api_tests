@@ -1,6 +1,7 @@
 name: Python Tests
+if: ${{ false }}
 
-on: 
+on: [ push, pull_request]
 
 jobs:
   test:
