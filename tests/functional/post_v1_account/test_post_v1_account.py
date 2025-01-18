@@ -5,6 +5,8 @@ import structlog
 from dm_api_account.apis.account_api import AccountApi
 from dm_api_account.apis.login_api import LoginApi
 from mailhog_api.apis.mailhog_api import MailhogApi
+from restclient.configuration import Configuration as MailhogConfiguration
+from restclient.configuration import Configuration as DmApiConfiguration
 
 structlog.configure(
     processors=[
@@ -16,10 +18,14 @@ structlog.configure(
 
 def test_post_v1_account():
     #Регистрация пользователя
-    account_api = AccountApi(host='http://5.63.153.31:5051')
-    login_api = LoginApi(host='http://5.63.153.31:5051')
-    mailhog_api =MailhogApi(host='http://5.63.153.31:5025')
-    login = 'ivan_32'
+    mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
+    dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
+
+    account_api = AccountApi(configuration=dm_api_configuration)
+    login_api = LoginApi(configuration=dm_api_configuration)
+    mailhog_api =MailhogApi(mailhog_configuration)
+
+    login = 'ivan_38'
     email = f'{login}@mail.ru'
     password = '123456789'
 
