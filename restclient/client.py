@@ -9,7 +9,7 @@ import curlify
 from restclient.configuration import Configuration
 
 
-class RestClient():
+class RestClient:
     def __init__(
             self,
             configuration: Configuration
