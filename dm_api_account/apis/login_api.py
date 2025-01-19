@@ -41,7 +41,7 @@ class LoginApi(RestClient):
             **kwargs
     ):
         """
-        Logout as current user
+        Logout as current user from all devices
         :param kwargs:
         :return:
         """
