@@ -56,6 +56,7 @@ class AccountApi(RestClient):
     def put_v1_account_password(
             self,
             json_data,
+            headers
     ):
         """
         Change registered user password
@@ -66,7 +67,8 @@ class AccountApi(RestClient):
 
         response = self.put(
             path=f'/v1/account/password',
-            json=json_data
+            json=json_data,
+            headers = headers
         )
         return response
 

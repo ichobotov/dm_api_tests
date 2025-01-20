@@ -54,8 +54,6 @@ class AccountHelper:
         token = {
             'x-dm-auth-token': response.headers['x-dm-auth-token']
         }
-        self.dm_api_account.account_api.set_headers(token)
-        self.dm_api_account.login_api.set_headers(token)
         json_data = {
             'login': login,
             'email': email
@@ -69,7 +67,7 @@ class AccountHelper:
             'oldPassword': oldPassword,
             'newPassword': newPassword
         }
-        self.dm_api_account.account_api.put_v1_account_password(json_data=json_data)
+        self.dm_api_account.account_api.put_v1_account_password(json_data=json_data, headers=token)
         assert response.status_code == 200, "Пароль не был изменен"
 
 
