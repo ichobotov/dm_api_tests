@@ -2,6 +2,12 @@ import time
 from json import loads
 
 from retrying import retry
+
+from dm_api_account.models.change_email import ChangeEmail
+from dm_api_account.models.change_password import ChangePassword
+from dm_api_account.models.login_credentials import LoginCredentials
+from dm_api_account.models.registration import Registration
+from dm_api_account.models.reset_password import ResetPassword
 from services.dm_api_account import DmApiAccount
 from services.api_mailhog import MailHogApi
 
@@ -29,7 +35,8 @@ class AccountHelper:
     ):
         response = self.user_login(
             login=login,
-            password=password
+            password=password,
+            return_model=False
         )
         token = {
             'x-dm-auth-token': response.headers['x-dm-auth-token']
@@ -40,31 +47,33 @@ class AccountHelper:
     def change_password(
             self,
             login,
-            oldPassword,
-            newPassword,
+            old_password,
+            new_password,
             email
             ):
         response = self.user_login(
             login=login,
-            password=oldPassword
+            password=old_password,
+            incorrect_login=True,
+            return_model=False
         )
         token = {
             'x-dm-auth-token': response.headers['x-dm-auth-token']
         }
-        json_data = {
-            'login': login,
-            'email': email
-         }
-        self.dm_api_account.account_api.post_v1_account_password(json_data=json_data)
+        reset_password = ResetPassword(
+            login=login,
+            email=email
+        )
+        self.dm_api_account.account_api.post_v1_account_password(reset_password=reset_password)
         assert response.status_code == 200, "Пароль не был сброшен"
         pass_token = self.get_activation_token_by_login(login=login, key='ConfirmationLinkUri')
-        json_data = {
-            'login': login,
-            'token': pass_token,
-            'oldPassword': oldPassword,
-            'newPassword': newPassword
-        }
-        self.dm_api_account.account_api.put_v1_account_password(json_data=json_data, headers=token)
+        change_password = ChangePassword(
+            login=login,
+            token=pass_token,
+            oldPassword=old_password,
+            newPassword=new_password
+        )
+        self.dm_api_account.account_api.put_v1_account_password(change_password=change_password, headers=token)
         assert response.status_code == 200, "Пароль не был изменен"
 
 
@@ -74,13 +83,12 @@ class AccountHelper:
             password: str,
             email: str
     ):
-        json_data = {
-            'login': login,
-            'email': email,
-            'password': password,
-        }
-
-        response = self.dm_api_account.account_api.post_v1_account(json_data=json_data)
+        registration = Registration(
+            login=login,
+            email=email,
+            password=password
+        )
+        response = self.dm_api_account.account_api.post_v1_account(registration=registration)
         assert response.status_code == 201, f"Пользователь не был создан, {response.json()}"
         start_time = time.time()
         token = self.get_activation_token_by_login(login=login, key='ConfirmationLinkUrl')
@@ -88,7 +96,6 @@ class AccountHelper:
         assert end_time - start_time < 3, "Время получения токена превышено"
         assert token is not None, f'Токен для пользователя {login} не был получен'
         response = self.dm_api_account.account_api.put_v1_account_token(token=token)
-        assert response.status_code == 200, "Пользователь не был активирован"
 
         return response
 
@@ -96,16 +103,20 @@ class AccountHelper:
             self,
             login: str,
             password: str,
-            rememberMe: bool = True
+            remember_me: bool = True,
+            return_model:bool = True,
+            incorrect_login:bool = False
     ):
         # Авторизация
-        json_data = {
-            'login': login,
-            'password': password,
-            'rememberMe': rememberMe,
-        }
+        login_credentials = LoginCredentials(
+            login=login,
+            password=password,
+            rememberMe=remember_me
 
-        response = self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
+        )
+        response = self.dm_api_account.login_api.post_v1_account_login(login_credentials=login_credentials, return_model=return_model)
+        if incorrect_login:
+            return response
         assert response.headers['x-dm-auth-token'], "Токен для пользоватля не был получен"
         assert response.status_code == 200, "Пользователь не был авторизован"
         return response
@@ -116,23 +127,20 @@ class AccountHelper:
             password: str,
             new_email: str
     ):
-        # Смена email
-        json_data = {
-            'login': login,
-            'password': password,
-            'email': new_email,
-        }
-        response = self.dm_api_account.account_api.put_v1_account_email(json_data)
-        assert response.status_code == 200, "Email не был изменен"
+        change_email = ChangeEmail(
+            login=login,
+            password=password,
+            email=new_email
+        )
+        response = self.dm_api_account.account_api.put_v1_account_email(change_email=change_email)
         # Попытка войти после смены почты
-        response = self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
+        response = self.user_login(login=login, password=password, incorrect_login=True, return_model=False)
         assert response.status_code == 403, "Вход пользователя не был запрещен"
         # Поиск токена для смены email
         token = self.get_activation_token_by_email(email=new_email)
         assert token is not None, f'токен для новой почты {new_email} пользователя {login} не был получен'
         # Активация пользователя с новым email
         response = self.dm_api_account.account_api.put_v1_account_token(token=token)
-        assert response.status_code == 200, "Пользователь не был активирован"
 
 
     @retry(stop_max_attempt_number=5, stop_max_delay=1000, retry_on_result=retry_if_result_none)
