@@ -1,5 +1,7 @@
+import base64
 import time
 from json import loads
+import re
 
 from retrying import retry
 
@@ -51,7 +53,7 @@ class AccountHelper:
             old_password,
             new_password,
             email
-            ):
+    ):
         response = self.user_login(
             login=login,
             password=old_password,
@@ -76,7 +78,6 @@ class AccountHelper:
         )
         self.dm_api_account.account_api.put_v1_account_password(change_password=change_password, headers=token)
         assert response.status_code == 200, "Пароль не был изменен"
-
 
     def register_new_user(
             self,
@@ -105,8 +106,8 @@ class AccountHelper:
             login: str,
             password: str,
             remember_me: bool = True,
-            return_model:bool = True,
-            incorrect_login:bool = False
+            return_model: bool = True,
+            incorrect_login: bool = False
     ):
         # Авторизация
         login_credentials = LoginCredentials(
@@ -115,7 +116,9 @@ class AccountHelper:
             rememberMe=remember_me
 
         )
-        response = self.dm_api_account.login_api.post_v1_account_login(login_credentials=login_credentials, return_model=return_model)
+        response = self.dm_api_account.login_api.post_v1_account_login(
+            login_credentials=login_credentials, return_model=return_model
+        )
         if incorrect_login:
             return response
         if return_model:
@@ -140,11 +143,10 @@ class AccountHelper:
         with check_status_code_http(403, "User is inactive. Address the technical support for more details"):
             self.user_login(login=login, password=password, incorrect_login=True, return_model=False)
         # Поиск токена для смены email
-        token = self.get_activation_token_by_email(email=new_email)
+        token = self.get_activation_token_by_email(login=login)
         assert token is not None, f'токен для новой почты {new_email} пользователя {login} не был получен'
         # Активация пользователя с новым email
         self.dm_api_account.account_api.put_v1_account_token(token=token)
-
 
     @retry(stop_max_attempt_number=5, stop_max_delay=1000, retry_on_result=retry_if_result_none)
     def get_activation_token_by_login(
@@ -166,14 +168,29 @@ class AccountHelper:
     @retry(stop_max_attempt_number=5, stop_max_delay=1000, retry_on_result=retry_if_result_none)
     def get_activation_token_by_email(
             self,
-            email
+            login
     ):
         token = None
         response = self.mailhog.mailhog_api.get_api_v2_messages()
         for item in response.json()['items']:
-            user_email = item['Content']['Headers']['To'][0]
-            if user_email == email:
+            decoded_str = self.decode_mime(item["Content"]["Headers"]["Subject"][0])
+            if ("Подтверждение смены адреса электронной почты".replace(' ', '').lower() in decoded_str.replace(' ', '').lower()) and (login in decoded_str):
                 user_data = loads(item['Content']['Body'])
                 token = user_data['ConfirmationLinkUrl'].split('/')[-1]
                 break
         return token
+
+    def decode_mime(
+            self,
+            encoded_string: str
+            ) -> str:
+        pattern = r"=\?utf-8\?b\?(.*?)\?="
+        decoded_string = encoded_string
+
+        for match in re.findall(pattern, encoded_string):
+            decoded_part = base64.b64decode(match).decode("utf-8")
+            decoded_string = decoded_string.replace(
+                "=?utf-8?b?" + match + "?=", decoded_part
+            )
+
+        return decoded_string
