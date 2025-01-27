@@ -14,13 +14,14 @@ class GetV1Account:
     @classmethod
     def check_response_values_for_auth_user(
             cls,
-            response
+            response,
+            login
     ):
         assert_that(
             response, all_of(
                 has_property(
                     'resource', has_properties(
-                        'login', equal_to("ivan_65"),
+                        'login', equal_to(login),
                         'online', instance_of(datetime),
                         'rating', has_properties(
                             'enabled', equal_to(True),

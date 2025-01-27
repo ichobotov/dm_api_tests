@@ -13,7 +13,7 @@ def test_post_v1_account(
     email = prepare_user.email
     account_helper.register_new_user(login=login, password=password, email=email)
     response = account_helper.user_login(login=login, password=password, return_model=True)
-    PostV1Account.check_response_values(response)
+    PostV1Account.check_response_values(response, login='ivan')
 
 
 @pytest.mark.parametrize(

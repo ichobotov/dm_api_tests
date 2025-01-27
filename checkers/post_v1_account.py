@@ -17,7 +17,8 @@ class PostV1Account:
     @classmethod
     def check_response_values(
             cls,
-            response
+            response,
+            login
     ):
         today = datetime.now().strftime("%Y-%m-%d")
         assert_that(str(response.resource.registration), starts_with(today))
@@ -25,7 +26,7 @@ class PostV1Account:
         assert_that(
             response, all_of
                 (
-                    has_property('resource', has_property('login', starts_with('ivan'))),
+                    has_property('resource', has_property('login', starts_with(login))),
                     has_property('resource', has_property('registration', instance_of(datetime))),
                     has_property(
                         'resource', has_property(

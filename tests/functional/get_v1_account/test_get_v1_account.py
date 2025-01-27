@@ -7,7 +7,7 @@ def test_get_v1_account_auth(
     ):
     with check_status_code_http():
         response = auth_account_helper.dm_api_account.account_api.get_v1_account()
-        GetV1Account.check_response_values_for_auth_user(response)
+        GetV1Account.check_response_values_for_auth_user(response, login="ivan_65")
 
 
 def test_get_v1_account_no_auth(
