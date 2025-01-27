@@ -117,6 +117,8 @@ class AccountHelper:
         response = self.dm_api_account.login_api.post_v1_account_login(login_credentials=login_credentials, return_model=return_model)
         if incorrect_login:
             return response
+        if return_model:
+            return response
         assert response.headers['x-dm-auth-token'], "Токен для пользоватля не был получен"
         assert response.status_code == 200, "Пользователь не был авторизован"
         return response
