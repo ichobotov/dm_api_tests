@@ -3,6 +3,7 @@ from json import loads
 
 from retrying import retry
 
+from checkers.http_checkers import check_status_code_http
 from dm_api_account.models.change_email import ChangeEmail
 from dm_api_account.models.change_password import ChangePassword
 from dm_api_account.models.login_credentials import LoginCredentials
@@ -120,7 +121,7 @@ class AccountHelper:
         if return_model:
             return response
         assert response.headers['x-dm-auth-token'], "Токен для пользоватля не был получен"
-        assert response.status_code == 200, "Пользователь не был авторизован"
+        # assert response.status_code == 200, "Пользователь не был авторизован" #Можно убрать данную проверку, тк добавили raise_for_status() в restclient
         return response
 
     def change_email(
@@ -134,15 +135,15 @@ class AccountHelper:
             password=password,
             email=new_email
         )
-        response = self.dm_api_account.account_api.put_v1_account_email(change_email=change_email)
+        self.dm_api_account.account_api.put_v1_account_email(change_email=change_email)
         # Попытка войти после смены почты
-        response = self.user_login(login=login, password=password, incorrect_login=True, return_model=False)
-        assert response.status_code == 403, "Вход пользователя не был запрещен"
+        with check_status_code_http(403, "User is inactive. Address the technical support for more details"):
+            self.user_login(login=login, password=password, incorrect_login=True, return_model=False)
         # Поиск токена для смены email
         token = self.get_activation_token_by_email(email=new_email)
         assert token is not None, f'токен для новой почты {new_email} пользователя {login} не был получен'
         # Активация пользователя с новым email
-        response = self.dm_api_account.account_api.put_v1_account_token(token=token)
+        self.dm_api_account.account_api.put_v1_account_token(token=token)
 
 
     @retry(stop_max_attempt_number=5, stop_max_delay=1000, retry_on_result=retry_if_result_none)
