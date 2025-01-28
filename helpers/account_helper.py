@@ -3,6 +3,7 @@ import time
 from json import loads
 import re
 
+import allure
 from retrying import retry
 
 from checkers.http_checkers import check_status_code_http
@@ -31,6 +32,7 @@ class AccountHelper:
         self.dm_api_account = dm_api_account
         self.mailhog = mailhog
 
+    @allure.step("Авторизация пользователя")
     def auth_client(
             self,
             login,
@@ -47,6 +49,7 @@ class AccountHelper:
         self.dm_api_account.account_api.set_headers(token)
         self.dm_api_account.login_api.set_headers(token)
 
+    @allure.step("Изменение пароля")
     def change_password(
             self,
             login,
@@ -69,7 +72,7 @@ class AccountHelper:
         )
         self.dm_api_account.account_api.post_v1_account_password(reset_password=reset_password)
         assert response.status_code == 200, "Пароль не был сброшен"
-        pass_token = self.get_activation_token_by_login(login=login, key='ConfirmationLinkUri')
+        pass_token = self.get_activation_token(login=login, subject="Подтверждение сброса пароля",key='ConfirmationLinkUri')
         change_password = ChangePassword(
             login=login,
             token=pass_token,
@@ -79,6 +82,7 @@ class AccountHelper:
         self.dm_api_account.account_api.put_v1_account_password(change_password=change_password, headers=token)
         assert response.status_code == 200, "Пароль не был изменен"
 
+    @allure.step("Регистрация нового пользователя")
     def register_new_user(
             self,
             login: str,
@@ -93,7 +97,7 @@ class AccountHelper:
         response = self.dm_api_account.account_api.post_v1_account(registration=registration)
         assert response.status_code == 201, f"Пользователь не был создан, {response.json()}"
         start_time = time.time()
-        token = self.get_activation_token_by_login(login=login, key='ConfirmationLinkUrl')
+        token = self.get_activation_token(login=login, subject="Добро пожаловать", key='ConfirmationLinkUrl')
         end_time = time.time()
         assert end_time - start_time < 3, "Время получения токена превышено"
         assert token is not None, f'Токен для пользователя {login} не был получен'
@@ -101,6 +105,7 @@ class AccountHelper:
 
         return response
 
+    @allure.step("Аутентификация пользователя")
     def user_login(
             self,
             login: str,
@@ -127,6 +132,7 @@ class AccountHelper:
         # assert response.status_code == 200, "Пользователь не был авторизован" #Можно убрать данную проверку, тк добавили raise_for_status() в restclient
         return response
 
+    @allure.step("Изменение электронной почты")
     def change_email(
             self,
             login: str,
@@ -143,40 +149,26 @@ class AccountHelper:
         with check_status_code_http(403, "User is inactive. Address the technical support for more details"):
             self.user_login(login=login, password=password, incorrect_login=True, return_model=False)
         # Поиск токена для смены email
-        token = self.get_activation_token_for_new_email(login=login)
+        token = self.get_activation_token(login=login, subject="Подтверждение смены адреса электронной почты", key="ConfirmationLinkUrl")
         assert token is not None, f'токен для новой почты {new_email} пользователя {login} не был получен'
         # Активация пользователя с новым email
         self.dm_api_account.account_api.put_v1_account_token(token=token)
 
+    @allure.step("Получение активационного токена")
     @retry(stop_max_attempt_number=5, stop_max_delay=1000, retry_on_result=retry_if_result_none)
-    def get_activation_token_by_login(
+    def get_activation_token(
             self,
             login,
+            subject,
             key
     ):
         token = None
         response = self.mailhog.mailhog_api.get_api_v2_messages()
         for item in response.json()['items']:
-
-            user_data = loads(item['Content']['Body'])
-            user_login = user_data['Login']
-            if user_login == login:
-                token = user_data[f'{key}'].split('/')[-1]
-                break
-        return token
-
-    @retry(stop_max_attempt_number=5, stop_max_delay=1000, retry_on_result=retry_if_result_none)
-    def get_activation_token_for_new_email(
-            self,
-            login
-    ):
-        token = None
-        response = self.mailhog.mailhog_api.get_api_v2_messages()
-        for item in response.json()['items']:
             decoded_str = self.decode_mime(item["Content"]["Headers"]["Subject"][0])
-            if ("Подтверждение смены адреса электронной почты".replace(' ', '').lower() in decoded_str.replace(' ', '').lower()) and (login in decoded_str):
+            if (subject.replace(' ', '').lower() in decoded_str.replace(' ', '').lower()) and (login in decoded_str):
                 user_data = loads(item['Content']['Body'])
-                token = user_data['ConfirmationLinkUrl'].split('/')[-1]
+                token = user_data[f'{key}'].split('/')[-1]
                 break
         return token
 
@@ -194,3 +186,6 @@ class AccountHelper:
             )
 
         return decoded_string
+
+    def __repr__(self):
+        return f"Метод класса помощника {self.__class__}"

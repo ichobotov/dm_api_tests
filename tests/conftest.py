@@ -1,6 +1,8 @@
 from datetime import datetime
 from pathlib import Path
 from typing import NamedTuple
+
+import allure
 import pytest
 import structlog
 
@@ -53,7 +55,7 @@ class User(NamedTuple):
 
 @pytest.fixture(scope='session')
 def mailhog_api():
-    mailhog_configuration = MailhogConfiguration(host=v.get('service.mailhog'),disable_log=False)
+    mailhog_configuration = MailhogConfiguration(host=v.get('service.mailhog'),disable_log=True)
     mailhog_api = MailHogApi(configuration=mailhog_configuration)
     return mailhog_api
 
@@ -70,7 +72,7 @@ def account_helper(account_api, mailhog_api):
 
 @pytest.fixture()
 def auth_account_helper(mailhog_api):
-    dm_api_configuration = DmApiConfiguration(host=v.get('service.dm_api_account'), disable_log=False)
+    dm_api_configuration = DmApiConfiguration(host=v.get('service.dm_api_account'))
     account = DmApiAccount(configuration=dm_api_configuration)
     account_helper = AccountHelper(dm_api_account=account, mailhog=mailhog_api)
     account_helper.auth_client(
@@ -78,6 +80,7 @@ def auth_account_helper(mailhog_api):
         password=v.get('user.password')
     )
     return account_helper
+
 
 
 
