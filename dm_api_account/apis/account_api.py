@@ -49,7 +49,7 @@ class AccountApi(RestClient):
             return user_details_envelope_model
         return response
 
-    @allure.step("Активировация пользователя")
+    @allure.step("Активация пользователя")
     def put_v1_account_token(
             self,
             token,
