@@ -69,7 +69,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Open Allure report
-        run: /usr/bin/allure open -c allure-results
+        run: ./allure open -c allure-results
 
 
 
