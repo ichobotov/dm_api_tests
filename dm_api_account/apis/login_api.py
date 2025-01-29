@@ -8,7 +8,7 @@ from restclient.client import RestClient
 
 class LoginApi(RestClient):
 
-    @allure.step("Метод аутентификации пользователя")
+    @allure.step("Аутентификация пользователя")
     def post_v1_account_login(
             self,
             login_credentials: LoginCredentials,
@@ -28,7 +28,7 @@ class LoginApi(RestClient):
             return user_envelope_model
         return response
 
-    @allure.step("Метод для выхода")
+    @allure.step("Выход из системы")
     def delete_v1_account_login(
             self,
             **kwargs
@@ -45,7 +45,7 @@ class LoginApi(RestClient):
         )
         return response
 
-    @allure.step("Метод ля выхода со всех устройств")
+    @allure.step("Выходиз системы на всех устройствах")
     def delete_v1_account_login_all(
             self,
             **kwargs

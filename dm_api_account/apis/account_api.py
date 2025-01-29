@@ -13,7 +13,7 @@ from restclient.client import RestClient
 
 class AccountApi(RestClient):
 
-    @allure.step("Метод регистрации пользователя")
+    @allure.step("Регистрация пользователя")
     def post_v1_account(
             self,
             registration: Registration
@@ -29,7 +29,7 @@ class AccountApi(RestClient):
         )
         return response
 
-    @allure.step("Метод получения текущего пользователя")
+    @allure.step("Получение текущего пользователя")
     def get_v1_account(
             self,
             return_model: bool = True,
@@ -49,7 +49,7 @@ class AccountApi(RestClient):
             return user_details_envelope_model
         return response
 
-    @allure.step("Метод активировации пользователя")
+    @allure.step("Активировация пользователя")
     def put_v1_account_token(
             self,
             token,
@@ -72,7 +72,7 @@ class AccountApi(RestClient):
             return user_envelope_model
         return response
 
-    @allure.step("Метод изменения пароля")
+    @allure.step("Изменение пароля")
     def put_v1_account_password(
             self,
             change_password: ChangePassword,
@@ -96,7 +96,7 @@ class AccountApi(RestClient):
             return user_envelope_model
         return response
 
-    @allure.step("Метод сброса пароля")
+    @allure.step("Сброс пароля")
     def post_v1_account_password(
             self,
             reset_password: ResetPassword
@@ -113,7 +113,7 @@ class AccountApi(RestClient):
         )
         return response
 
-    @allure.step("Метод изменения электронной почты")
+    @allure.step("Изменение адреса электронной почты")
     def put_v1_account_email(
             self,
             change_email: ChangeEmail,
