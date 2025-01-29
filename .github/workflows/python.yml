@@ -64,7 +64,7 @@ jobs:
       - name: Download Allure results
         uses: actions/download-artifact@v4
       - name: Upload Allure report
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v4
       - name: Deploy to Guthub pages
         id: deployment
         uses: actions/deploy-pages@v1.2.9
