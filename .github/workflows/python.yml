@@ -49,7 +49,7 @@ jobs:
       - name: Download Allure results
         uses: actions/download-artifact@v3
       - name: Generate Allure report
-      - run: allure generate -c  allure-results -o _site
+        run: allure generate -c  allure-results -o _site
       - name: Store report
         uses: actions/upload-artifact@v3
         with:
@@ -69,7 +69,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v1.2.9
       - name: Open Allure report
-      - run: allure open -c allure-results
+        run: allure open -c allure-results
 
 
 
