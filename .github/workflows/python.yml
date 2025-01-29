@@ -30,7 +30,7 @@ jobs:
         continue-on-error: True
 
       - name: Archive Allure results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: allure-results
           path: allure-results
@@ -45,13 +45,13 @@ jobs:
           distribution: 'microsoft'
           java-version: '17'
       - name: Download Allure
-        run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz && sudo tar -xvzf allure-2.29.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.29.0/bin/allure /usr/bin/allure
+        run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz && sudo tar -xvzf allure-2.32.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.32.0/bin/allure /usr/bin/allure
       - name: Download Allure results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       - name: Generate Allure report
         run: allure generate -c  allure-results -o _site
       - name: Store report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: _site
           path: _site
@@ -62,7 +62,7 @@ jobs:
     name: Publish report
     steps:
       - name: Download Allure results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       - name: Upload Allure report
         uses: actions/upload-pages-artifact@v2
       - name: Deploy to Guthub pages
