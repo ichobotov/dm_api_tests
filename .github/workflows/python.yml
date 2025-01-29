@@ -46,7 +46,7 @@ jobs:
           java-version: '17'
       - name: Download Allure
         run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz && sudo tar -xvzf allure-2.32.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.32.0/bin/allure /usr/bin/allure
-      - name: 111
+      - name: 1111
         run: ll /opt/allure-2.32.0/bin/
       - name: Download Allure results
         uses: actions/download-artifact@v4
