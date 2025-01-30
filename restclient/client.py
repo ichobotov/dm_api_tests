@@ -1,13 +1,16 @@
 from requests import (
     session,
     JSONDecodeError,
+    Response,
 )
 import structlog
 import uuid
 import curlify
+from swagger_coverage_py.request_schema_handler import RequestSchemaHandler
 
 from restclient.configuration import Configuration
 from restclient.utilities import allure_attach
+from swagger_coverage_py.uri import URI
 
 
 class RestClient:
@@ -79,7 +82,15 @@ class RestClient:
         )
         rest_response = self.session.request(method=method, url=full_url, **kwargs)
         curl = curlify.to_curl(rest_response.request)
+
+
+        uri = URI(host=self.host, base_path="", unformatted_path=path, uri_params=kwargs.get('params'))
+        RequestSchemaHandler(
+            uri=uri, method=method.lower(), response=rest_response, kwargs=kwargs
+        ).write_schema()
+
         print(curl)
+
         log.msg(
             event='Response',
             status_code=rest_response.status_code,

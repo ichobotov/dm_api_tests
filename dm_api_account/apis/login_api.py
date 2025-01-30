@@ -41,6 +41,7 @@ class LoginApi(RestClient):
 
         response = self.delete(
             path='/v1/account/login',
+            json={},
             **kwargs
         )
         return response
@@ -58,6 +59,7 @@ class LoginApi(RestClient):
 
         response = self.delete(
             path='/v1/account/login/all',
+            json={},
             **kwargs
         )
         return response
