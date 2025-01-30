@@ -1,9 +1,11 @@
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import NamedTuple
 
 import pytest
 import structlog
+import platform
 from swagger_coverage_py.reporter import CoverageReporter
 
 from vyper import v
@@ -51,8 +53,11 @@ def set_config(request):
     request.config.stash['telegram-notifier-addfields']['environment'] = config_name
     request.config.stash['telegram-notifier-addfields']['report'] = 'https://ichobotov.github.io/dm_api_tests/'
 
-    # os.environ["TELEGRAM_BOT_CHAT_ID"] = v.get('telegram.chat_id')
-    # os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get('telegram.token')
+    if platform.system() == "Windows":
+        pass
+    else:
+        os.environ["TELEGRAM_BOT_CHAT_ID"] = v.get('telegram.chat_id')
+        os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get('telegram.token')
 
 def pytest_addoption(parser):
     parser.addoption("--env", action='store', default='stg', help='run stg')
