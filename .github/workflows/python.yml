@@ -39,7 +39,7 @@ jobs:
         #continue-on-error: True
 
       - name: Run Coverage
-        if: $(( always() ))
+        if: always()
         run: |
           python -m packages.notofier.bot.py
 
