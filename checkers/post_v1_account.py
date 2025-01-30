@@ -22,7 +22,7 @@ class PostV1Account:
             login
     ):
         with allure.step("Проверка ответа"):
-            today = datetime.now().strftime("%Y-%m-%d")
+            today = datetime.now().utcnow().strftime("%Y-%m-%d")
             assert_that(str(response.resource.registration), starts_with(today))
             # noinspection PyTypeChecker
             assert_that(
