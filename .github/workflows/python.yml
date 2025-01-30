@@ -18,6 +18,14 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+      - name: Set Up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
+
 
       - name: Install dependencies
         run: |
@@ -26,8 +34,14 @@ jobs:
 
       - name: Run tests
         run: |
+          export JAVA_HOMO=$JAVA_HOME
           pytest ./tests --alluredir=allure-results --disable-warnings
         #continue-on-error: True
+
+      - name: Run Coverage
+        if: $(( always() ))
+        run: |
+          python -m packages.notofier.bot.py
 
       - name: Archive Allure results
         uses: actions/upload-artifact@v4

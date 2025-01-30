@@ -1,9 +1,9 @@
 import allure
-import requests
 
-from dm_api_account.models.login_credentials import LoginCredentials
-from dm_api_account.models.user_envelope import UserEnvelope
-from restclient.client import RestClient
+from clients.http.dm_api_account.models.login_credentials import LoginCredentials
+from clients.http.dm_api_account.models.user_envelope import UserEnvelope
+from packages.restclient.client import RestClient
+
 
 
 class LoginApi(RestClient):
