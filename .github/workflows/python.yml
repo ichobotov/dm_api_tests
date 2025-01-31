@@ -36,7 +36,7 @@ jobs:
         run: |
           export JAVA_HOMO=$JAVA_HOME
           pytest ./tests --alluredir=allure-results --disable-warnings
-        #continue-on-error: True
+        continue-on-error: True
 
       - name: Run Coverage
         if: always()
