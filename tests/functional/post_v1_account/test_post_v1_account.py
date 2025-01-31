@@ -20,7 +20,7 @@ class TestsPostV1Account:
         response = account_helper.user_login(login=login, password=password, return_model=True)
         PostV1Account.check_response_values(response, login='ivan')
 
-
+    @allure.sub_suite("Негативные тесты")
     @pytest.mark.parametrize(
         "login, email, password, expected_code, expected_message, errors_details, title",
         [
