@@ -1,0 +1,12 @@
+service:
+  dm_api_account: 'http://5.63.153.31:5051'
+  mailhog: 'http://5.63.153.31:5025'
+
+user:
+  login: 'ivan'
+  password: '123456789'
+
+telegram:
+  chat_id: '-1002419627688'
+  token: '8064938216:AAEsy2V_iSbgbEpoBCS-8pON3kc-5q1le90'
+

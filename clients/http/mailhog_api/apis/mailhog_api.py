@@ -1,10 +1,12 @@
-import requests
+import allure
 
-from restclient.client import RestClient
+from packages.restclient.client import RestClient
+
 
 
 class MailhogApi(RestClient):
 
+    @allure.step("Получение {limit} писем")
     def get_api_v2_messages(
             self,
             limit=50
