@@ -33,17 +33,29 @@ class TelegramBot:
 
     def send_file(
             self,
-            file_path=Path(__file__).parent.joinpath('../..').joinpath('swagger-coverage-report-dm-api-account.html')
+            file_path: str = ''
             ) -> None:
-        with open(file_path, 'rb') as document:
-            self._telegram_bot.send_document(
-                self._chat_id,
-                document=document,
-                caption='coverage',
-            )
+        try:
+            file_path = Path(__file__).parent.joinpath('../..').joinpath('swagger-coverage-report-dm-api-account.html')
+            with open(file_path, 'rb') as document:
+                self._telegram_bot.send_document(
+                    self._chat_id,
+                    document=document,
+                    caption='coverage',
+                )
+        except FileNotFoundError:
+            print("не удалось найти итоговый файл")
+            file_path = Path(__file__).parent.joinpath('../..').joinpath('failed-swagger-coverage-report-dm-api-account.html')
+            with open(file_path, 'rb') as document:
+                self._telegram_bot.send_document(
+                    self._chat_id,
+                    document=document,
+                    caption='coverage',
+                )
 
 if __name__ == '__main__':
     TelegramBot().send_file()
+
 
 
 # @enum.unique
