@@ -37,6 +37,7 @@ jobs:
       - name: Send Notification
         if: always()
         run: |
+          cd /home/runner/work/dm_api_tests/dm_api_tests
           python -m packages.notifier.bot
       - name: Archive Allure results
         uses: actions/upload-artifact@v4
