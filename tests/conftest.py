@@ -60,11 +60,11 @@ def set_config(request):
         os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get('telegram.token')
 
 
+
 def pytest_addoption(parser):
     parser.addoption("--env", action='store', default='stg', help='run stg')
     for option in options:
         parser.addoption(f"--{option}", action='store', default=None)
-
 
 
 class User(NamedTuple):
