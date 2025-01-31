@@ -78,11 +78,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - run: echo "https://ichobotov.github.io/dm_api_tests/"
-      - name: Temp
-        if: always()
-        run: |
-          pwd
-          ls -l
 
 
 
