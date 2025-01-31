@@ -101,9 +101,6 @@ def auth_account_helper(mailhog_api):
     )
     return account_helper
 
-
-
-
 @pytest.fixture()
 def prepare_user():
     now = datetime.now()
