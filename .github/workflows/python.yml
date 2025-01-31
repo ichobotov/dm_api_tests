@@ -34,6 +34,10 @@ jobs:
           export JAVA_HOMO=$JAVA_HOME
           pytest ./tests --alluredir=allure-results --disable-warnings
         continue-on-error: True
+      - name: Send Notification
+        if: always()
+        run: |
+          python -m packages.notifier.bot
       - name: Archive Allure results
         uses: actions/upload-artifact@v4
         with:
@@ -74,12 +78,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - run: echo "https://ichobotov.github.io/dm_api_tests/"
-      - name: Send Notification
-        if: always()
-        run: |
-          pwd
-          cd /home/runner/work/dm_api_tests/dm_api_tests
-          python -m packages.notifier.bot
 
 
 
