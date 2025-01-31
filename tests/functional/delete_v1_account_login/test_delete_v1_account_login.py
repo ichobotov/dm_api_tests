@@ -11,4 +11,4 @@ class TestDeleteV1AccountLogin:
             auth_account_helper
             ):
         response = auth_account_helper.dm_api_account.login_api.delete_v1_account_login()
-        assert response.status_code == 204, "Пользователь не был разлогирован"
+        assert response.status_code == 203, "Пользователь не был разлогирован"
