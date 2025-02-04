@@ -53,6 +53,7 @@ def set_config(request):
     request.config.stash['telegram-notifier-addfields']['environment'] = config_name
     request.config.stash['telegram-notifier-addfields']['report'] = 'https://ichobotov.github.io/dm_api_tests/'
 
+
     if platform.system() == "Windows":
         pass
     else:
